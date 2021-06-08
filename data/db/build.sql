@@ -1,10 +1,12 @@
 CREATE TABLE IF NOT EXISTS students(
     UserID integer PRIMARY KEY,
     StudentCode integer,
-    StudentName text
+    StudentName text,
+    GroupNum text
 );
 
-CREATE TABLE IF NOT EXISTS roles(
-    RoleName text PRIMARY KEY,
-    RoleID integer
+CREATE TABLE IF NOT EXISTS studentDB(
+    StudentCode integer PRIMARY KEY,
+    StudentName text,
+    GroupNum text
 );

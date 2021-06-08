@@ -1,8 +1,9 @@
 from discord.ext.commands import command
 from discord.ext.commands import  Cog
-from discord import Member
+from discord import Role
 from ..db import db
-from typing import Optional
+from discord.utils import get
+
 
 
 class welcome(Cog):
@@ -11,22 +12,27 @@ class welcome(Cog):
 
 
     @command(name="role")
-    async def give_role_to_someone(self, ctx, member, role: Optional[str]):
+    async def give_role_to_someone(self, ctx, member, role: Role = None):
         if role == None:
-            role = member
-            role_id = db.column("SELECT RoleID FROM roles WHERE RoleName = ?",
-                                 role)
-
+            for role in ctx.author.roles:
+                if role.name == "Newbie":
+                    await ctx.author.remove_roles(ctx.guild.get_role(775674479598370846))
+            role = get(ctx.guild.roles, name=f"{member}")
             await self.bot.log_message(f"**{ctx.author.name}** gave himself/herself a role **{role}** ")
-            await ctx.author.add_roles(ctx.author.guild.get_role(role_id[-1]))
+            await ctx.author.add_roles(role)
 
         else:
-            role_id = db.column("SELECT RoleID FROM roles WHERE RoleName = ?",
-                                role)
-            user = ctx.guild.get_member(self.member_id_maker(member))
+            if ctx.author.guild_permissions.administrator:
+                user = ctx.guild.get_member(self.member_id_maker(member))
 
-            await self.bot.log_message(f"**{ctx.author.name}** gave role **{role}** to **{ctx.author.name}**")
-            await user.add_roles(user.guild.get_role(role_id[-1]))
+                await self.bot.log_message(f"**{ctx.author.name}** gave role **{role}** to **{ctx.author.name}**")
+                await user.add_roles(role)
+
+            else:
+                user = ctx.guild.get_member(self.member_id_maker(member))
+
+                await self.bot.log_message(f"**{ctx.author.name}** tried to give **{user.name}** role **{role}** without permission!")
+                await ctx.channel.send("You don't have permissions to do that! Try **!role <ROLE>**")
 
 
     def member_id_maker(self, member):
@@ -50,7 +56,7 @@ class welcome(Cog):
 
     @Cog.listener()
     async def on_member_remove(self, member):
-        db.execute("DELETE FROM exp WHERE UserID = ?", member.id)
+        db.execute("DELETE FROM students WHERE UserID = ?", member.id)
 
         await self.bot.log_message(f"**{member.name}** has left the server")
 

@@ -1,11 +1,12 @@
 from ..db import db
 from discord.ext.commands import Bot as BotBase
-from  apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from discord.ext.commands import CommandNotFound, BadArgument, MissingRequiredArgument, CommandOnCooldown
 from discord.errors import HTTPException, Forbidden
 from discord import Intents
-from asyncio import sleep
+from asyncio import sleep, run
 from glob import glob
+
 
 
 PREFIX = "!"
@@ -51,12 +52,12 @@ class Bot(BotBase):
         db.multiexec("INSERT OR IGNORE INTO students (UserID) VALUES (?)",
                      ((member.id,) for member in self.guild.members if not member.bot))
 
-        db.multiexec("INSERT OR IGNORE INTO roles (RoleName) VALUES (?)",
-                     ((role.name,) for role in self.guild.roles))
-
-        for role in self.guild.roles:
-            db.execute("UPDATE roles SET RoleID = ? WHERE RoleName = ?",
-                        role.id, role.name)
+        # db.multiexec("INSERT OR IGNORE INTO roles (RoleName) VALUES (?)",
+        #              ((role.name,) for role in self.guild.roles))
+        #
+        # for role in self.guild.roles:
+        #     db.execute("UPDATE roles SET RoleID = ? WHERE RoleName = ?",
+        #                 role.id, role.name)
 
         to_remove = []
 
